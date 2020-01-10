@@ -5,7 +5,7 @@ The script can be run by the system, e.g. every minute.
 
 The pscp.ps1 script retrieves data from AD, filters data by the TargetAddress field. Then it creates 2 files:
 one with email addresses ($TargetAddressesFile) and the other with the first file's hash ($Hashfile). 
-He then sends them to Smarthost running under Linux using pscp software.
+Then sends them to Smarthost running under Linux using pscp software.
 
 The files is sent only if there has been any change in the generated data.
 
@@ -19,6 +19,7 @@ $Hashfile is also used to verify the checksum of the Hashfile is also used to ve
 
 Script postfix_map.sh working on linux based Smarthost. This script creates a relay_recipients file for postfix.
 The script can be run by the system, e.g. every minute.
+
 
 ## blacklist
 
