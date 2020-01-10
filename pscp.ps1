@@ -37,19 +37,20 @@ if ($TargetAddressesFileHash -ne $TargetAddressesFileoldHash) {
 	Write-Output "Files $TargetAddressesFile and $TargetAddressesFileold aren't equal"
 
 	$ScpOptions = "-ls"
-    $AAAA = iex $ScpCopyCmd | select-string $TargetAddressesFile 
+        $AAAA = iex $ScpCopyCmd | select-string $TargetAddressesFile 
  
 	if ([string]::IsNullOrWhitespace($AAAA)){
         
         $ScpOptions = "$Path$TargetAddressesFile"
- 		iex $ScpCopyCmd
-		Start-Sleep -s 2
+ 	iex $ScpCopyCmd
+	Start-Sleep -s 2
         $ScpOptions = "$Path$HashFile"
-	    iex $ScpCopyCmd
+	iex $ScpCopyCmd
+	
 	}
 	else {
 		Write-Output "File still exist on remote host"
-        Out-File -FilePath $Path$TargetAddressesFile   
+                Out-File -FilePath $Path$TargetAddressesFile   
 	}
 }
 
