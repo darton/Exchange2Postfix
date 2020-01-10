@@ -8,7 +8,6 @@ $PostfixUrl = "ex2k@smarthost.example.com:/home/ex2k/"
 $ADBase = "DC=EXAMPLE,DC=COM"
 $ScpCopyCmd = '& $Path$pscp -i $Path$PostfixPrivateKey $ScpOptions $PostfixUrl'
 
-
 if (!(Test-Path $Path$TargetAddressesFile -PathType Leaf)){
 
     Out-File -FilePath $Path$TargetAddressesFile
@@ -31,7 +30,7 @@ Get-ADUser -Filter {(TargetAddress -like "*")} -SearchBase $ADBase -Properties T
 $TargetAddressesFileHash = $(Get-FileHash $Path$TargetAddressesFile).Hash 
 $TargetAddressesFileoldHash = $(Get-FileHash $Path$TargetAddressesFileold).Hash
 
-Write-Output $TargetAddressesFileHash > $HashFile
+Write-Output $TargetAddressesFileHash | Out-File -Encoding UTF8 $Path$HashFile
 
 if ($TargetAddressesFileHash -ne $TargetAddressesFileoldHash) {
 
@@ -42,10 +41,10 @@ if ($TargetAddressesFileHash -ne $TargetAddressesFileoldHash) {
  
 	if ([string]::IsNullOrWhitespace($AAAA)){
         
-        $ScpOptions = $TargetAddressesFile
+        $ScpOptions = "$Path$TargetAddressesFile"
  		iex $ScpCopyCmd
 		Start-Sleep -s 2
-        $ScpOptions = $HashFile
+        $ScpOptions = "$Path$HashFile"
 	    iex $ScpCopyCmd
 	}
 	else {
