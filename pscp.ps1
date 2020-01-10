@@ -36,7 +36,6 @@ $TargetAddressesFileoldHash = $(Get-FileHash $Path$TargetAddressesFileold).Hash
 
 Write-Output $TargetAddressesFileHash > $HashFile
 
-
 if ($TargetAddressesFileHash -ne $TargetAddressesFileoldHash) {
 
 	Write-Output "Files $TargetAddressesFile and $TargetAddressesFileold aren't equal"
