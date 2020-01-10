@@ -13,13 +13,10 @@ if (!(Test-Path $Path$TargetAddressesFile -PathType Leaf)){
 
     Out-File -FilePath $Path$TargetAddressesFile
 }
-
-
 if (!(Test-Path $Path$HashFile -PathType Leaf)){
 
     Out-File -FilePath $Path$HashFile
 }
-
 if ((Test-Path $Path$TargetAddressesFileold -PathType Leaf)){
 
     del $Path$TargetAddressesFileold
