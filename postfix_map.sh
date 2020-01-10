@@ -4,7 +4,7 @@ EXLIST_DIR=/home/ex2k
 SCRIPT_DIR=/root/scripts
 POSTFIX_DIR=/etc/postfix
 FILENAME=e-mail.txt
-FILETEST=e-mail.ok
+FILEHASH=e-mail.ok
 
 function extract_valid_recipients {
 
@@ -25,7 +25,7 @@ if [ "$HASH1" == "$HASH2" ]; then
 
     extract_valid_recipients $EXLIST_DIR/$FILENAME $SCRIPT_DIR/relay_recipients
 
-#    if [ $? == 0 ]; then
+    if [ $? == 0 ]; then
 
         cat $SCRIPT_DIR/relay_recipients > $POSTFIX_DIR/relay_recipients
 
@@ -35,12 +35,12 @@ if [ "$HASH1" == "$HASH2" ]; then
 
         rm -f $EXLIST_DIR/$FILENAME
 
-        echo Done!
-#    else
-#       echo 'Can not extract valid recipients'
-#       exit 0
-
+        echo "Done!"
+    else
+        echo "Can not extract valid recipients from $EXLIST_DIR/$FILENAME"
+        exit 0
+    fi
 else
-    File does not exist, is empty or downloaded file checksum does not match.
+    echo "File does not exist, is empty or downloaded File checksum does not match!"
 
 fi
