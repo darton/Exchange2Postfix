@@ -3,13 +3,16 @@
 The script can be installed in the c: \ export directory, e.g. on MS Exchange Server or if we use Exchange DAG, e.g. on the Witness instance.
 The script can be run by the system, e.g. every minute.
 
-The pscp.ps1 script retrieves data from AD, filters data by the TargetAddress field. Then it creates 2 files: one with email addresses and the other with the first file's hash. He then sends them to Smarthost running under Linux using pscp software.
+The pscp.ps1 script retrieves data from AD, filters data by the TargetAddress field. Then it creates 2 files:
+one with email addresses ($TargetAddressesFile) and the other with the first file's hash ($Hashfile). 
+He then sends them to Smarthost running under Linux using pscp software.
 
 The files is sent only if there has been any change in the generated data.
 
 To avoid overwriting the file during data processing by Smarthost software, the script checks if the file previously sent to Smarhost exists. The new file is not sent until the file previously sent to Smarthost has been deleted.
 
-To avoid Smarthost's processing of a file that has not been fully uploaded, the script sends an additional empty $StatusFile file, whose presence is for software running on Smarthost's side that the $TargetAddressesFile file has been sent in full.
+To avoid Smarthost's processing of a file that has not been fully uploaded, the script sends an additional $HashFile file, whose presence is for software running on Smarthost's side that the $TargetAddressesFile file has been sent in full.
+$Hashfile is also used to verify the checksum of the Hashfile is also used to verify the checksum of the $TargetAddressesFile.
 
 
 ## postfix_map.sh
