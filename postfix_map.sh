@@ -41,6 +41,6 @@ if [ "$HASH1" == "$HASH2" ]; then
 #       exit 0
 
 else
-    echo File does not exist or is empty.
+    File does not exist, is empty or downloaded file checksum does not match.
 
 fi
