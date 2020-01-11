@@ -21,7 +21,7 @@ if ((Test-Path $Path$TargetAddressesFileold -PathType Leaf)){
     del $Path$TargetAddressesFileold
 }
 
-move $Path$TargetAddressesFile $Path$TargetAddressesFileold
+Move-Item $Path$TargetAddressesFile $Path$TargetAddressesFileold
 
 Out-File -FilePath $Path$TargetAddressesFile
 
