@@ -41,11 +41,11 @@ if ($TargetAddressesFileHash -ne $TargetAddressesFileoldHash) {
  
 	if ([string]::IsNullOrWhitespace($AAAA)){
         
-        $ScpOptions = "$Path$TargetAddressesFile"
- 	iex $ScpCopyCmd
-	Start-Sleep -s 2
-        $ScpOptions = "$Path$HashFile"
-	iex $ScpCopyCmd
+        	$ScpOptions = "$Path$TargetAddressesFile"
+ 		iex $ScpCopyCmd
+		Start-Sleep -s 2
+        	$ScpOptions = "$Path$HashFile"
+		iex $ScpCopyCmd
 	
 	}
 	else {
