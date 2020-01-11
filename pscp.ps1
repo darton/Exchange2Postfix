@@ -37,15 +37,15 @@ if ($TargetAddressesFileHash -ne $TargetAddressesFileoldHash) {
 	Write-Output "Files $TargetAddressesFile and $TargetAddressesFileold aren't equal"
 
 	$ScpOptions = "-ls"
-        $AAAA = iex $ScpCopyCmd | select-string $TargetAddressesFile 
+        $AAAA = Invoke-Expression $ScpCopyCmd | select-string $TargetAddressesFile 
  
 	if ([string]::IsNullOrWhitespace($AAAA)){
         
         	$ScpOptions = "$Path$TargetAddressesFile"
- 		iex $ScpCopyCmd
+ 		Invoke-Expression $ScpCopyCmd
 		Start-Sleep -s 2
         	$ScpOptions = "$Path$HashFile"
-		iex $ScpCopyCmd
+		Invoke-Expression $ScpCopyCmd
 	
 	}
 	else {
