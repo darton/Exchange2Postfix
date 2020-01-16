@@ -5,4 +5,4 @@ $trigger =  New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionInterval (N
 
 $principal = New-ScheduledTaskPrincipal -UserID "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount -RunLevel Highest
 
-Register-ScheduledTask -Action $action -Trigger $trigger -Principal $principal -TaskName "SentToScript" -Description "Generate SentTo from TransportRule"
+Register-ScheduledTask -Action $action -Trigger $trigger -Principal $principal -TaskName "pscp" -Description "Run pscp.ps1 script"
