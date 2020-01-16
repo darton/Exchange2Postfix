@@ -26,6 +26,7 @@ Move-Item $Path$TargetAddressesFile $Path$TargetAddressesFileold
 Out-File -FilePath $Path$TargetAddressesFile
 
 Get-ADUser -Filter {(TargetAddress -like "*")} -SearchBase $ADBase -Properties TargetAddress | ft TargetAddress | Out-File -Encoding UTF8 $Path$TargetAddressesFile
+Get-ADObject -Filter 'objectClass -eq "contact"' -SearchBase $ADBase -Properties TargetAddress | ft TargetAddress  | Out-File -Encoding UTF8 -Append $Path$TargetAddressesFile
 
 $TargetAddressesFileHash = $(Get-FileHash $Path$TargetAddressesFile).Hash 
 $TargetAddressesFileoldHash = $(Get-FileHash $Path$TargetAddressesFileold).Hash
