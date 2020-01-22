@@ -3,8 +3,8 @@
 EXLIST_DIR=/home/ex2k
 SCRIPT_DIR=/root/scripts
 POSTFIX_DIR=/etc/postfix
-FILENAME=e-mail.txt
-FILEHASH=e-mail.hash
+FILENAME=email.txt
+FILEHASH=email.hash
 
 function extract_valid_recipients {
 
