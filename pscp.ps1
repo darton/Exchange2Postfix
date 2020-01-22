@@ -1,9 +1,9 @@
 $Path = "c:\export\"
 $pscp = "pscp.exe"
 $PostfixPrivateKey = "smarthost.example.com.ppk"
-$TargetAddressesFile = "e-mail.txt"
-$TargetAddressesFileold = "e-mail.old"
-$HashFile = "e-mail.hash"
+$TargetAddressesFile = "email.txt"
+$TargetAddressesFileold = "email.old"
+$HashFile = "email.hash"
 $PostfixUrl = "ex2k@smarthost.example.com:/home/ex2k/"
 $ADBase = "DC=EXAMPLE,DC=COM"
 $ScpCopyCmd = '& $Path$pscp -i $Path$PostfixPrivateKey $ScpOptions $PostfixUrl'
