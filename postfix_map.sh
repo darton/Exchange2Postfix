@@ -6,11 +6,20 @@ POSTFIX_DIR=/etc/postfix
 FILENAME=email.txt
 FILEHASH=email.hash
 
+
 function extract_valid_recipients {
 
 cat $1 |tr -d \" | tr , \\n| tr \; \\n| tr -d '\r' | awk -F\: '/(SMTP|smtp):/ {printf("%s\tOK\n" ,$2)}' | tr -d '}' | grep -v -f $SCRIPT_DIR/blacklist > $2
 
 }
+
+
+function extract_valid_domains {
+
+cat $1 |tr -d \" | tr , \\n| tr \; \\n| tr -d '\r' | awk -F\: '/(DomainName):/ {printf("%s\tOK\n" ,$2)}' | tr -d '}' | grep -v -f $SCRIPT_DIR/blacklist > $2
+
+}
+
 
 [[ -s $EXLIST_DIR/$FILENAME ]] || exit 0
 
@@ -24,10 +33,11 @@ HASH2=$(sha256sum $EXLIST_DIR/$FILENAME|awk '{print $1}'|tr a-z A-Z)
 if [ "$HASH1" == "$HASH2" ]; then
 
     extract_valid_recipients $EXLIST_DIR/$FILENAME $SCRIPT_DIR/relay_recipients
+    extract_valid_domains $EXLIST_DIR/$FILENAME $SCRIPT_DIR/relay_domains
 
     if [ $? == 0 ]; then
 
-        cat $SCRIPT_DIR/relay_recipients > $POSTFIX_DIR/relay_recipients
+        cat $SCRIPT_DIR/relay_recipients |awk '{print $1}' |sort -u | tr 'A-Z' 'a-z' | awk '{print $1"\tOK"}' > $POSTFIX_DIR/relay_recipients
 
         [[ ! -f $EXLIST_DIR/$FILEHASH ]] || rm -f $EXLIST_DIR/$FILEHASH
 
