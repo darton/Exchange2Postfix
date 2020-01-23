@@ -35,7 +35,7 @@ Out-File -FilePath $Path$ConfigFile
 #$ADUserTargetAddress = Get-ADUser -Filter {(TargetAddress -like "*")} -SearchBase $ADBase -Properties TargetAddress | ft TargetAddress 
 
 ##Get ADUser ProxyAddresses
-$ADUserProxyAddresses = Get-ADUser -Filter *  -Properties proxyaddresses |Select-Object -ExpandProperty proxyaddresses | Foreach-Object { [pscustomobject] @{ProxyAddresses = $_} }
+$ADUserProxyAddresses = Get-ADUser -Filter *  -Properties proxyaddresses |Select-Object -ExpandProperty proxyaddresses | Select-String "smtp" | Foreach-Object { [pscustomobject] @{ProxyAddresses = $_} }
 
 ##Get AD Contact TargetAddress
 $ContactTargetAddress = Get-ADObject -Filter 'objectClass -eq "contact"' -Properties TargetAddress | Format-table TargetAddress  
