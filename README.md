@@ -11,8 +11,8 @@ The files is sent only if there has been any change in the generated data.
 
 To avoid overwriting the file during data processing by Smarthost software, the script checks if the file previously sent to Smarhost exists. The new file is not sent until the file previously sent to Smarthost has been deleted.
 
-To avoid Smarthost's processing of a file that has not been fully uploaded, the script sends an additional $HashFile file, whose presence is for software running on Smarthost's side that the $TargetAddressesFile file has been sent in full.
-$Hashfile is also used to verify the checksum of the Hashfile is also used to verify the checksum of the $TargetAddressesFile.
+To avoid Smarthost's processing of a file that has not been fully uploaded, the script sends an additional HashFile file, whose presence is for software running on Smarthost's side that the first config file has been sent in full.
+Hashfile is also used to verify the checksum of the config file.
 
 
 ## postfix_map.sh
