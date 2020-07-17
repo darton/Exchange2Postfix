@@ -28,7 +28,6 @@ move $Path$ConfigFile $Path$ConfigFileold
 Out-File -FilePath $Path$ConfigFile
 
 
-
 ###Get data from AD
 
 ##Get ADUser TargetAddress
@@ -38,7 +37,7 @@ Out-File -FilePath $Path$ConfigFile
 $ADUserProxyAddresses = Get-ADUser -Filter *  -Properties proxyaddresses |Select-Object -ExpandProperty proxyaddresses | Select-String "smtp" | Foreach-Object { [pscustomobject] @{ProxyAddresses = $_} }
 
 ##Get AD Contact TargetAddress
-$ContactTargetAddress = Get-ADObject -Filter 'objectClass -eq "contact"' -Properties TargetAddress | Format-table TargetAddress  
+$ContactTargetAddress = Get-ADObject -Filter 'objectClass -eq "contact"' -Properties TargetAddress | Select-Object -ExpandProperty TargetAddress  
 
 ##Get AD Contact ProxyAddresses
 $ContactProxyAddresses = Get-ADObject -Filter 'objectClass -eq "contact"' -Properties proxyaddresses |Select-Object -ExpandProperty proxyaddresses | Foreach-Object { [pscustomobject] @{ProxyAddresses = $_} } 
@@ -56,6 +55,8 @@ $AcceptedDomain = Get-AcceptedDomain |select -ExpandProperty DomainName | foreac
 $TransportRuleSentTo = Get-TransportRule |select -ExpandProperty SentTo |foreach {"SMTP:" +$_}
 
 ##Get Mailbox EmailAddress
+#Get-Mailbox |ft -Property EmailAddresses | Out-File -Encoding UTF8 -Append $Path$ConfigFile
+
 # Create an object to hold the results
 $addresses = @()
 
@@ -81,20 +82,23 @@ ForEach ($mbx in $Mailboxes) {
 # Export the final object to a csv in the working directory
 
 $MailboxEmailAddress = $addresses  | select -expandproperty EmailAddress| foreach {"smtp:" +$_} | Sort-Object  
+$DistributionGroup = Get-DistributionGroup | select -ExpandProperty PrimarySmtpAddress |  foreach {"smtp:" +$_}
+$DynamicDistributionGroup = Get-DynamicDistributionGroup | select -ExpandProperty PrimarySmtpAddress |  foreach {"smtp:" +$_}
 
 Remove-PSSnapin Microsoft.Exchange.Management.PowerShell.SnapIn;
 
-
-
 ###Writing data to file
 
-$ADUserProxyAddresses | Out-File -Encoding UTF8 $Path$ConfigFile
-$ContactTargetAddress | Out-File -Encoding UTF8 -Append $Path$ConfigFile
-$ContactProxyAddresses | Out-File -Encoding UTF8 -Append $Path$ConfigFile
-$TransportRuleSentTo | Out-File -Encoding UTF8 -Append $Path$ConfigFile
-#$MailboxEmailAddress | Out-File -Encoding UTF8 -Append $Path$ConfigFile
-$AcceptedDomain | Out-File -Encoding UTF8 -Append $Path$ConfigFile
+Write-Output $ADUserProxyAddresses |sort | Out-File -Encoding UTF8 $Path$ConfigFile
+Write-Output $ContactTargetAddress |sort | Out-File -Encoding UTF8 -Append $Path$ConfigFile
+Write-Output $ContactProxyAddresses |sort | Out-File -Encoding UTF8 -Append $Path$ConfigFile
+Write-Output $TransportRuleSentTo |sort | Out-File -Encoding UTF8 -Append $Path$ConfigFile
+# Write-Output $MailboxEmailAddress |sort | Out-File -Encoding UTF8 -Append $Path$ConfigFile
+Write-Output $DistributionGroup |sort | Out-File -Encoding UTF8 -Append $Path$ConfigFile
+Write-Output $DynamicDistributionGroup |sort | Out-File -Encoding UTF8 -Append $Path$ConfigFile
+Write-Output $AcceptedDomain |sort | Out-File -Encoding UTF8 -Append $Path$ConfigFile
 
+#Get-Content $Path$ConfigFileTmp |sort | Out-File -Encoding UTF8 $Path$ConfigFile
 
 ###Comparing two files and sending new file to smarthost when old and new file is not equal
 $ConfigFileHash = $(Get-FileHash $Path$ConfigFile).Hash 
@@ -106,7 +110,7 @@ Write-Output $ConfigFileHash | Out-File -Encoding UTF8 $Path$HashFile
 if ($ConfigFileHash -ne $ConfigFileoldHash) {
 
 	Write-Output "Files $ConfigFile and $ConfigFileold aren't equal"
-
+        Start-Sleep -s 2
 	$ScpOptions = "-ls"
         $AAAA = Invoke-Expression $ScpCopyCmd | select-string $ConfigFile 
  
@@ -126,5 +130,5 @@ if ($ConfigFileHash -ne $ConfigFileoldHash) {
 
 else {
 	Write-Output "New file is the same as old"
+        Start-Sleep -s 2
 }
-
