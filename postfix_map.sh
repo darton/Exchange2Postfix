@@ -21,11 +21,24 @@ cat $1 |tr -d \" | tr , \\n| tr \; \\n| tr -d '\r' | awk -F\: '/(DomainName):/ {
 }
 
 
-[[ -s $EXLIST_DIR/$FILENAME ]] || exit 0
+if [ ! -s $EXLIST_DIR/$FILEHASH ] || [ ! -s $EXLIST_DIR/$FILENAME ] ; then
 
-while [ ! -s $EXLIST_DIR/$FILEHASH ]; do
-:
-done
+    if [ -f $EXLIST_DIR/$FILEHASH ] ; then
+         rm $EXLIST_DIR/$FILEHASH
+    fi
+    if [ -f $EXLIST_DIR/$FILENAME ] ; then
+        rm $EXLIST_DIR/$FILENAME
+    fi
+    
+    echo "File does not exits or is empty!"
+    exit 0
+fi
+
+#[[ -s $EXLIST_DIR/$FILENAME ]] || exit 0
+#
+#while [ ! -s $EXLIST_DIR/$FILEHASH ]; do
+#:
+#done
 
 HASH1=$(cat $EXLIST_DIR/$FILEHASH|awk '{print $1}'|sed '1s/^\xEF\xBB\xBF//'|tr -d '\r')
 HASH2=$(sha256sum $EXLIST_DIR/$FILENAME|awk '{print $1}'|tr a-z A-Z)
