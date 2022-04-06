@@ -21,6 +21,10 @@ Script postfix_map.sh working on linux based Smarthost. This script creates a re
 The script can be run by the system, e.g. every minute.
 
 
-## blacklist
+##  notallowed_domains, notallowed_emails
 
-A file in which to put a list of domains or email addresses that are not to appear in the file created by postfix_map.sh.
+A files in which to put a list of domains or email addresses that are not to appear in the file created by postfix_map.sh.
+
+##  allowed_domains
+
+File where you should put the list of domains for which e-mail addresses appear in the file created by postfix_map.sh.
