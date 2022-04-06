@@ -81,10 +81,6 @@ Out-File -FilePath $Path$EmailFile
 Add-PSSnapin Microsoft.Exchange.Management.PowerShell.SnapIn;
 
 # Export recipients to csv
-#Get-Recipient -ResultSize Unlimited|Select Name -Expandproperty EmailAddresses|Select-Object SmtpAddress|Export-Csv $Path#$EmailFile
-#Get-Recipient -ResultSize Unlimited|Select Name -Expandproperty EmailAddresses | Where-Object {$_.PrefixString -eq "SMTP"} |Select-Object #SmtpAddress|Export-Csv $Path$EmailFile
-#Get-Recipient -RecipientType MailContact | Select-Object Name -ExpandProperty ExternalEmailAddress |Select-Object name -ExpandProperty #SmtpAddress|Export-Csv $Path$EmailFile
-####((Get-Recipient -ResultSize Unlimited).EmailAddresses).SmtpAddress| Out-File -Encoding UTF8 $Path$EmailFile
 
 $addresses = @()
 $recipients = Get-Recipient -ResultSize Unlimited
