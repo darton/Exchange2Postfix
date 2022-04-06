@@ -3,8 +3,8 @@
 The script can be installed in the c: \ export directory, e.g. on MS Exchange Server or if we use Exchange DAG, e.g. on the Witness instance.
 The script can be run by the system, e.g. every minute.
 
-The pscp.ps1 script retrieves data from AD. Then it creates 2 files:
-one with email addresses and the other with the first file's hash. 
+The pscp.ps1 script retrieves data from MS Exchange. 
+Then it creates 2 files: one with email addresses and the other with the first file's hash. 
 Then sends them to Smarthost running under Linux using pscp software.
 
 The files is sent only if there has been any change in the generated data.
