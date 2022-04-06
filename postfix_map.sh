@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 SCRIPT_DIR=/root/skrypty
 EXLIST_DIR=/home/user/exchange
