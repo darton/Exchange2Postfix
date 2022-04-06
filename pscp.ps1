@@ -15,7 +15,6 @@ $lockfile = “c:\export\lock.lck"
 
 $lockstatus = 0
 
-
 While ($lockstatus -ne 1)
     {
         If (Test-Path $lockfile)
