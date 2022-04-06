@@ -58,7 +58,6 @@ Else
 ## Main Script Part
 ## ----------------
 
-
 if (!(Test-Path $Path$EmailFile -PathType Leaf)){
 
     Out-File -FilePath $Path$EmailFile
@@ -72,15 +71,12 @@ if ((Test-Path $Path$EmailFileold -PathType Leaf)){
     del $Path$EmailFileold
 }
 
-
 move $Path$EmailFile $Path$EmailFileold
 
 Out-File -FilePath $Path$EmailFile
 
-### Get data from MS Exchange 
+### Get data from MS Exchange and export recipients to csv
 Add-PSSnapin Microsoft.Exchange.Management.PowerShell.SnapIn;
-
-# Export recipients to csv
 
 $addresses = @()
 $recipients = Get-Recipient -ResultSize Unlimited
@@ -90,6 +86,7 @@ $addresses | sort -uniq | select {($_).tolower()} | Export-Csv $Path$EmailFile
 Remove-PSSnapin Microsoft.Exchange.Management.PowerShell.SnapIn;
 
 ###Comparing two files and sending new file to smarthost when old and new file is not equal
+
 $EmailFileHash = $(Get-FileHash $Path$EmailFile).Hash 
 $EmailFileoldHash = $(Get-FileHash $Path$EmailFileold).Hash
 
@@ -120,7 +117,6 @@ else {
 	Write-Output "New file is the same as old"
         Start-Sleep -s 2
 }
-
 
 ## -----------------
 #remove the lockfile
