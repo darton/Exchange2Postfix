@@ -1,130 +1,122 @@
-$Path = "c:\export\"
-$ComputerName = $env:COMPUTERNAME.ToLower()
-$pscp = "pscp.exe"
-$PostfixPrivateKey = "smarthost.ppk"
-$ConfigFile = "email_$ComputerName.txt"
-$ConfigFileold = "email_$ComputerName.old"
-$HashFile = "email_$ComputerName.hash"
+$Path = "C:\export\files\"
 $PostfixUrl = "user@smarthost.example.com:/home/user/"
-$ADBase = "DC=EXAMPLE,DC=COM"
-$ScpCopyCmd = '& $Path$pscp -i $Path$PostfixPrivateKey $ScpOptions $PostfixUrl'
+
+$PscpPath = "C:\export\"
+$pscp = "pscp.exe"
+$PostfixPrivateKey = "user.ppk"
+$ScpCopyCmd = '& $PscpPath$pscp -i $PscpPath$PostfixPrivateKey $ScpOptions $PostfixUrl'
+
+$ComputerName = $env:COMPUTERNAME.ToLower()
+$EmailFile = "email_$ComputerName.txt"
+$EmailFileold = "email_$ComputerName.old"
+$EmailHashFile = "email_$ComputerName.hash"
+
+$lockfile = “c:\export\lock.lck"
+
+$lockstatus = 0
 
 
-if (!(Test-Path $Path$ConfigFile -PathType Leaf)){
+While ($lockstatus -ne 1)
+    {
+        If (Test-Path $lockfile)
+    {
 
-    Out-File -FilePath $Path$ConfigFile
+echo “Lock file found!”
+
+$pidlist = Get-content $lockfile
+
+If (!$pidlist)
+    {
+        $PID | Out-File $lockfile
+        $lockstatus = 1
+    }
+
+$currentproclist = Get-Process | ? { $_.id -match $pidlist }
+
+If ($currentproclist)
+{
+        echo “lockfile in use by other process!”
+        $rndwait = New-Object system.Random
+        $rndwait= $rndwait.next(1,4)
+        echo “Sleeping for $rndwait seconds”
+        Start-Sleep $rndwait
+    }
+Else
+    {
+    Remove-Item $lockfile -Force
+    $PID | Out-File $lockfile
+    $lockstatus = 1
+    }
 }
-if (!(Test-Path $Path$HashFile -PathType Leaf)){
-
-    Out-File -FilePath $Path$HashFile
+Else
+{
+    $PID | Out-File $lockfile
+    $lockstatus = 1
 }
-if ((Test-Path $Path$ConfigFileold -PathType Leaf)){
-
-    del $Path$ConfigFileold
 }
 
-move $Path$ConfigFile $Path$ConfigFileold
-
-Out-File -FilePath $Path$ConfigFile
-
-
-###Get data from AD
-
-##Get ADUser TargetAddress
-#$ADUserTargetAddress = Get-ADUser -Filter {(TargetAddress -like "*")} -SearchBase $ADBase -Properties TargetAddress | ft TargetAddress 
-
-##Get ADUser ProxyAddresses
-$ADUserProxyAddresses = Get-ADUser -Filter *  -Properties proxyaddresses |Select-Object -ExpandProperty proxyaddresses | Select-String "smtp" | Foreach-Object { [pscustomobject] @{ProxyAddresses = $_} }
-
-##Get AD Contact TargetAddress
-$ContactTargetAddress = Get-ADObject -Filter 'objectClass -eq "contact"' -Properties TargetAddress | Select-Object -ExpandProperty TargetAddress  
-
-##Get AD Contact ProxyAddresses
-$ContactProxyAddresses = Get-ADObject -Filter 'objectClass -eq "contact"' -Properties proxyaddresses |Select-Object -ExpandProperty proxyaddresses | Foreach-Object { [pscustomobject] @{ProxyAddresses = $_} } 
+## Main Script Part
+## ----------------
 
 
+if (!(Test-Path $Path$EmailFile -PathType Leaf)){
+
+    Out-File -FilePath $Path$EmailFile
+}
+if (!(Test-Path $Path$EmailHashFile -PathType Leaf)){
+
+    Out-File -FilePath $Path$EmailHashFile
+}
+if ((Test-Path $Path$EmailFileold -PathType Leaf)){
+
+    del $Path$EmailFileold
+}
+
+
+move $Path$EmailFile $Path$EmailFileold
+
+Out-File -FilePath $Path$EmailFile
 
 ### Get data from MS Exchange 
 Add-PSSnapin Microsoft.Exchange.Management.PowerShell.SnapIn;
 
-##Get Get-AcceptedDomain
-$AcceptedDomain = Get-AcceptedDomain |select -ExpandProperty DomainName | foreach {"DomainName:" +$_}
+# Export recipients to csv
+#Get-Recipient -ResultSize Unlimited|Select Name -Expandproperty EmailAddresses|Select-Object SmtpAddress|Export-Csv $Path#$EmailFile
+#Get-Recipient -ResultSize Unlimited|Select Name -Expandproperty EmailAddresses | Where-Object {$_.PrefixString -eq "SMTP"} |Select-Object #SmtpAddress|Export-Csv $Path$EmailFile
+#Get-Recipient -RecipientType MailContact | Select-Object Name -ExpandProperty ExternalEmailAddress |Select-Object name -ExpandProperty #SmtpAddress|Export-Csv $Path$EmailFile
+####((Get-Recipient -ResultSize Unlimited).EmailAddresses).SmtpAddress| Out-File -Encoding UTF8 $Path$EmailFile
 
-## Get TransportRule SentTo
-#$TransportRuleSentTo = foreach ($a in Get-TransportRule |select -ExpandProperty SentTo) {Write-Output SMTP:$a}
-$TransportRuleSentTo = Get-TransportRule |select -ExpandProperty SentTo |foreach {"SMTP:" +$_}
-
-##Get Mailbox EmailAddress
-#Get-Mailbox |ft -Property EmailAddresses | Out-File -Encoding UTF8 -Append $Path$ConfigFile
-
-# Create an object to hold the results
 $addresses = @()
-
-# Get every mailbox in the Exchange Organisation
-$Mailboxes = Get-Mailbox -ResultSize Unlimited
-
-# Recurse through the mailboxes
-ForEach ($mbx in $Mailboxes) {
-
-# Recurse through every address assigned to the mailbox
-    Foreach ($address in $mbx.EmailAddresses) {
-
-# If it starts with "SMTP:" then it's an email address. Record it
-        if ($address.ToString().ToLower().StartsWith("smtp:")) {
-            # This is an email address. Add it to the list
-            $obj = "" | Select-Object EmailAddress
-            $obj.EmailAddress = $address.ToString().SubString(5)
-            $addresses += $obj
-        }
-    }
-}
-
-# Export the final object to a csv in the working directory
-
-$MailboxEmailAddress = $addresses  | select -expandproperty EmailAddress| foreach {"smtp:" +$_} | Sort-Object  
-$DistributionGroup = Get-DistributionGroup | select -ExpandProperty PrimarySmtpAddress |  foreach {"smtp:" +$_}
-$DynamicDistributionGroup = Get-DynamicDistributionGroup | select -ExpandProperty PrimarySmtpAddress |  foreach {"smtp:" +$_}
+$recipients = Get-Recipient -ResultSize Unlimited
+foreach ($read in $recipients){$addresses += $read.EmailAddresses.SmtpAddress; $addresses += $read.ExternalEmailAddress.SmtpAddress}
+$addresses | sort -uniq | select {($_).tolower()} | Export-Csv $Path$EmailFile
 
 Remove-PSSnapin Microsoft.Exchange.Management.PowerShell.SnapIn;
 
-###Writing data to file
-
-Write-Output $ADUserProxyAddresses |sort | Out-File -Encoding UTF8 $Path$ConfigFile
-Write-Output $ContactTargetAddress |sort | Out-File -Encoding UTF8 -Append $Path$ConfigFile
-Write-Output $ContactProxyAddresses |sort | Out-File -Encoding UTF8 -Append $Path$ConfigFile
-Write-Output $TransportRuleSentTo |sort | Out-File -Encoding UTF8 -Append $Path$ConfigFile
-# Write-Output $MailboxEmailAddress |sort | Out-File -Encoding UTF8 -Append $Path$ConfigFile
-Write-Output $DistributionGroup |sort | Out-File -Encoding UTF8 -Append $Path$ConfigFile
-Write-Output $DynamicDistributionGroup |sort | Out-File -Encoding UTF8 -Append $Path$ConfigFile
-Write-Output $AcceptedDomain |sort | Out-File -Encoding UTF8 -Append $Path$ConfigFile
-
-#Get-Content $Path$ConfigFileTmp |sort | Out-File -Encoding UTF8 $Path$ConfigFile
-
 ###Comparing two files and sending new file to smarthost when old and new file is not equal
-$ConfigFileHash = $(Get-FileHash $Path$ConfigFile).Hash 
-$ConfigFileoldHash = $(Get-FileHash $Path$ConfigFileold).Hash
+$EmailFileHash = $(Get-FileHash $Path$EmailFile).Hash 
+$EmailFileoldHash = $(Get-FileHash $Path$EmailFileold).Hash
 
-Write-Output $ConfigFileHash | Out-File -Encoding UTF8 $Path$HashFile
+Write-Output $EmailFileHash | Out-File -Encoding UTF8 $Path$EmailHashFile
 
+if ($EmailFileHash -ne $EmailFileoldHash) {
 
-if ($ConfigFileHash -ne $ConfigFileoldHash) {
-
-	Write-Output "Files $ConfigFile and $ConfigFileold aren't equal"
+	Write-Output "Files $EmailFile and $EmailFileold aren't equal"
         Start-Sleep -s 2
 	$ScpOptions = "-ls"
-        $AAAA = Invoke-Expression $ScpCopyCmd | select-string $ConfigFile 
+        $AAAA = Invoke-Expression $ScpCopyCmd | select-string $EmailFile 
  
 	if ([string]::IsNullOrWhitespace($AAAA)){
         
-        $ScpOptions = "$Path$ConfigFile"
- 		Invoke-Expression $ScpCopyCmd
-		Start-Sleep -s 2
-        $ScpOptions = "$Path$HashFile"
+        $ScpOptions = "$Path$EmailFile"
+ 		    Invoke-Expression $ScpCopyCmd
+		    Start-Sleep -s 2
+        $ScpOptions = "$Path$EmailHashFile"
 	        Invoke-Expression $ScpCopyCmd
 	}
 	else {
 		Write-Output "File still exist on remote host"
-                Out-File -FilePath $Path$ConfigFile   
+                Out-File -FilePath $Path$EmailFile
 	}
 }
 
@@ -132,3 +124,9 @@ else {
 	Write-Output "New file is the same as old"
         Start-Sleep -s 2
 }
+
+
+## -----------------
+#remove the lockfile
+
+Remove-Item $lockfile –Force
